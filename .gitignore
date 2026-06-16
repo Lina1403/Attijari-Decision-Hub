@@ -6,6 +6,8 @@
 
 !/project/
 !/project/**
+!/machine learning/
+!/machine learning/**
 
 **/node_modules/
 **/dist/
