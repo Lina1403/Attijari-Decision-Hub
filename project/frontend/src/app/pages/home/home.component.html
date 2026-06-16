@@ -1,0 +1,137 @@
+<section class="home-page">
+  <section class="hero-section">
+    <div class="hero-copy">
+      <p class="section-label">Cockpit decisionnel</p>
+      <h1 class="page-title">Bonjour, {{ userFirstName }}</h1>
+      <p class="page-subtitle">
+        {{ longDate }} - pilotage executif de la performance bancaire, du churn predictif et des
+        opportunites commerciales.
+      </p>
+    </div>
+
+    <div class="hero-side" *ngIf="overview() as data">
+      <div class="alert-summary">
+        <span class="alert-symbol">!</span>
+        <div>
+          <strong>{{ alertCount(data) }} alertes prioritaires</strong>
+          <p>Surveillance reseau, service client et retention active.</p>
+        </div>
+      </div>
+      <label class="hero-search">
+        <span>⌕</span>
+        <input type="search" placeholder="Rechercher un client, une agence ou un dashboard..." />
+      </label>
+    </div>
+  </section>
+
+  <div *ngIf="error()" class="error-banner">
+    <strong>Donnees indisponibles</strong>
+    <span>{{ error() }}</span>
+  </div>
+
+  <section *ngIf="isLoading()" class="kpi-grid">
+    <div class="kpi-card loading" *ngFor="let _ of [1, 2, 3, 4]"></div>
+  </section>
+
+  <ng-container *ngIf="overview() as data">
+    <section class="kpi-grid" aria-label="Indicateurs principaux">
+      <article
+        *ngFor="let item of data.kpis; let index = index; trackBy: trackById"
+        class="kpi-card panel subtle-hover"
+        [class]="getAccentClass(item)"
+      >
+        <div class="kpi-head">
+          <div>
+            <p class="kpi-label">{{ item.label }}</p>
+            <h2>{{ item.value }}</h2>
+          </div>
+          <span class="metric-icon">{{ item.icon || item.label.slice(0, 2).toUpperCase() }}</span>
+        </div>
+        <div class="kpi-meta">
+          <p class="kpi-change" [class]="getTrendClass(item)">{{ item.change }}</p>
+          <p class="kpi-helper">{{ item.helperText }}</p>
+        </div>
+        <svg class="sparkline" viewBox="0 0 132 40" preserveAspectRatio="none" aria-hidden="true">
+          <polyline [attr.points]="sparklinePoints(index)"></polyline>
+        </svg>
+      </article>
+    </section>
+
+    <section class="section-block">
+      <div class="section-header">
+        <div>
+          <p class="section-label">Portefeuille analytique</p>
+          <h2>Dashboards principaux</h2>
+          <p>Six espaces Power BI harmonises pour une lecture executive et operationnelle.</p>
+        </div>
+      </div>
+
+      <div class="shortcut-grid">
+        <a
+          *ngFor="let shortcut of data.shortcuts; trackBy: trackById"
+          [routerLink]="shortcut.path"
+          class="shortcut-card panel subtle-hover"
+          [class]="'tone-' + getShortcutTone(shortcut)"
+        >
+          <div class="shortcut-head">
+            <span class="badge">{{ getShortcutBadge(shortcut) }}</span>
+            <span class="more">•••</span>
+          </div>
+          <h3>{{ shortcut.title }}</h3>
+          <p>{{ shortcut.description }}</p>
+          <span class="shortcut-link">Ouvrir le dashboard <span>→</span></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="bottom-grid">
+      <div id="home-alerts" class="alerts-card panel-padding">
+        <div class="section-header compact">
+          <div>
+            <p class="section-label">Signaux de controle</p>
+            <h2>Activite recente</h2>
+            <p>Les cinq derniers signaux critiques remontes par la plateforme.</p>
+          </div>
+        </div>
+
+        <div class="alert-list">
+          <article *ngFor="let alert of data.alerts; trackBy: trackById" class="alert-item">
+            <span class="alert-dot" [class]="getAlertTone(alert.severity)"></span>
+            <div class="alert-copy">
+              <div class="alert-title-row">
+                <p class="alert-title">{{ alert.title }}</p>
+                <span class="pill" [class]="'pill-' + getAlertTone(alert.severity)">{{ alert.severity }}</span>
+              </div>
+              <p class="alert-description">{{ alert.description }}</p>
+            </div>
+            <span class="alert-time">{{ getRelativeTime(alert.timestamp) }}</span>
+          </article>
+        </div>
+      </div>
+
+      <div class="recommendations-block">
+        <div class="section-header compact">
+          <div>
+            <p class="section-label">Intelligence active</p>
+            <h2>Recommandations ML</h2>
+            <p>Actions prioritaires calculees sur le portefeuille actif.</p>
+          </div>
+        </div>
+
+        <a
+          *ngFor="let recommendation of data.recommendations; trackBy: trackById"
+          [routerLink]="getRecommendationPath(recommendation)"
+          class="recommendation-card panel subtle-hover"
+        >
+          <span class="pill pill-violet">{{ recommendation.category }}</span>
+          <h3>{{ recommendation.title }}</h3>
+          <p>{{ recommendation.description }}</p>
+          <div class="recommendation-meta">
+            <span>Impact {{ recommendation.impact }}</span>
+            <span>{{ recommendation.roi }}</span>
+          </div>
+        </a>
+      </div>
+    </section>
+  </ng-container>
+</section>

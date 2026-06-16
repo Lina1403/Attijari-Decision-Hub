@@ -1,0 +1,145 @@
+<div class="shell" [class.sidebar-collapsed]="isSidebarCollapsed()">
+  <button
+    *ngIf="isSidebarOpen()"
+    type="button"
+    class="sidebar-overlay"
+    aria-label="Fermer le menu"
+    (click)="closeSidebar()"
+  ></button>
+
+  <aside class="sidebar" [class.sidebar-open]="isSidebarOpen()" [class.is-collapsed]="isSidebarCollapsed()">
+    <div class="sidebar-header">
+      <div class="brand-mark">AT</div>
+      <div class="brand-copy">
+        <p class="brand-title">Attijari</p>
+        <p class="brand-subtitle">Decision Hub</p>
+      </div>
+      <button type="button" class="sidebar-close" aria-label="Fermer le menu" (click)="closeSidebar()">x</button>
+    </div>
+
+    <div class="sidebar-tools">
+      <button
+        type="button"
+        class="collapse-button"
+        [attr.aria-pressed]="isSidebarCollapsed()"
+        (click)="toggleSidebarCollapse()"
+      >
+        <span>{{ isSidebarCollapsed() ? '→' : '←' }}</span>
+        <span class="collapse-copy">Reduire</span>
+      </button>
+    </div>
+
+    <div class="sidebar-scroll">
+      <ng-container *ngIf="!isLoading(); else loadingNav">
+        <section class="nav-section" *ngFor="let module of navigationModules()">
+          <p class="nav-label">{{ module.label }}</p>
+          <nav class="nav-stack" [attr.aria-label]="module.label">
+            <a
+              *ngFor="let item of module.items"
+              [routerLink]="item.path"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: item.path === '/home' }"
+              class="nav-link"
+              [attr.title]="isSidebarCollapsed() ? item.label : null"
+              (click)="closeSidebar()"
+            >
+              <span class="nav-icon">{{ iconFor(item.label) }}</span>
+              <span class="nav-copy">{{ item.label }}</span>
+            </a>
+          </nav>
+        </section>
+      </ng-container>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <span class="user-avatar">{{ user.initials }}</span>
+        <div class="user-copy">
+          <p class="user-name">{{ user.fullName }}</p>
+          <p class="user-email">{{ user.role }}</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="page-wrap">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="icon-nav menu-button" aria-label="Ouvrir le menu" (click)="toggleSidebar()">☰</button>
+        <div class="breadcrumbs-block">
+          <nav class="breadcrumbs" aria-label="Fil d Ariane">
+            <ng-container *ngFor="let crumb of breadcrumbs(); let last = last; let index = index">
+              <span *ngIf="index > 0" class="crumb-separator">/</span>
+              <a *ngIf="!last" [routerLink]="crumb.path" class="crumb-link">{{ crumb.label }}</a>
+              <span *ngIf="last" class="crumb-current">{{ crumb.label }}</span>
+            </ng-container>
+          </nav>
+          <p class="topbar-date">{{ currentDate() }} · {{ currentTime() }}</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <form class="search-form" (submit)="submitSearch($event)">
+          <span class="search-icon">⌕</span>
+          <input
+            type="search"
+            [value]="searchQuery()"
+            placeholder="Rechercher un client, une agence ou un dashboard..."
+            (input)="updateSearchQuery($event)"
+          />
+        </form>
+
+        <button type="button" class="alert-button" (click)="goToAlerts()" aria-label="Voir les alertes">
+          <span>!</span>
+          <strong>5</strong>
+        </button>
+
+        <button type="button" class="icon-nav" [attr.aria-pressed]="isDarkMode()" (click)="toggleTheme()">
+          {{ isDarkMode() ? '☀' : '◐' }}
+        </button>
+
+        <div class="profile-shell" data-profile-shell>
+          <button type="button" class="profile-trigger" (click)="toggleProfile()">
+            <span class="profile-avatar">{{ user.initials }}</span>
+            <span class="profile-name">{{ user.firstName }}</span>
+            <span class="profile-caret">v</span>
+          </button>
+
+          <div *ngIf="isProfileOpen()" class="profile-menu">
+            <div class="profile-card">
+              <span class="profile-avatar large">{{ user.initials }}</span>
+              <div>
+                <p class="user-name">{{ user.fullName }}</p>
+                <p class="user-email">{{ user.email }}</p>
+                <p class="user-role">{{ user.role }}</p>
+              </div>
+            </div>
+            <button type="button" class="menu-link">Mon profil</button>
+            <button type="button" class="menu-link">Parametres</button>
+            <button type="button" class="menu-link danger">Se deconnecter</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-frame">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Navigation mobile">
+    <a
+      *ngFor="let item of primaryBottomItems()"
+      [routerLink]="item.path"
+      routerLinkActive="is-active"
+      [routerLinkActiveOptions]="{ exact: item.path === '/home' }"
+    >
+      <span>{{ iconFor(item.label) }}</span>
+      <small>{{ item.label }}</small>
+    </a>
+  </nav>
+</div>
+
+<ng-template #loadingNav>
+  <div class="nav-skeleton" *ngFor="let _ of [1, 2, 3, 4, 5]"></div>
+</ng-template>

@@ -1,0 +1,36 @@
+import {
+  Activity,
+  BarChart3,
+  Brain,
+  Building2,
+  LayoutDashboard,
+  Lightbulb,
+  MapPinned,
+  Megaphone,
+  MessageSquareWarning,
+  MessagesSquare,
+  ShieldAlert,
+  SlidersHorizontal,
+  Smile,
+  UserMinus,
+  Users,
+} from 'lucide-react';
+import type { IconKey } from '@/types';
+
+export const iconMap = {
+  users: Users,
+  userMinus: UserMinus,
+  smile: Smile,
+  building2: Building2,
+  layoutDashboard: LayoutDashboard,
+  activity: Activity,
+  megaphone: Megaphone,
+  messageSquareWarning: MessageSquareWarning,
+  mapPinned: MapPinned,
+  messagesSquare: MessagesSquare,
+  brain: Brain,
+  shieldAlert: ShieldAlert,
+  slidersHorizontal: SlidersHorizontal,
+  lightbulb: Lightbulb,
+  barChart3: BarChart3,
+} satisfies Record<IconKey, typeof Users>;

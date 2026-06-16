@@ -1,0 +1,381 @@
+<section *ngIf="isLoading()" class="status-empty">Chargement de la page intelligence...</section>
+
+<section *ngIf="error()" class="status-empty error">{{ error() }}</section>
+
+<ng-container *ngIf="page() as pageData">
+  <section class="page-intro">
+    <p class="section-label">{{ pageData.eyebrow }}</p>
+    <h1 class="page-title">{{ pageData.title }}</h1>
+    <p class="page-subtitle intro-copy">{{ pageData.description }}</p>
+  </section>
+
+  <ng-container *ngIf="isPage('clients-risque')">
+    <section class="metric-grid">
+      <article
+        *ngFor="let metric of pageData.metrics ?? []; trackBy: trackById"
+        class="metric-card panel"
+        [class]="metricToneClass(metric)"
+      >
+        <p>{{ metric.label }}</p>
+        <h2>{{ metric.value }}</h2>
+        <span>{{ metric.helperText }}</span>
+      </article>
+    </section>
+
+    <div class="risk-tabs">
+      <button
+        *ngFor="let tab of pageData.riskTabs ?? []; trackBy: trackById"
+        type="button"
+        class="tab-button"
+        [class.active]="selectedRisk() === tab.id"
+        (click)="setRiskTab(tab.id)"
+      >
+        {{ tab.label }} ({{ tab.count }})
+      </button>
+    </div>
+
+    <section class="panel filters-bar">
+      <label class="search-box">
+        <span>Recherche</span>
+        <input
+          type="search"
+          [value]="searchQuery()"
+          placeholder="Nom, ID, segment ou gouvernorat"
+          (input)="updateSearchQuery($event)"
+        />
+      </label>
+      <div class="filters-copy">
+        <strong>{{ filteredRows().length }}</strong>
+        <span>resultats visibles dans cette vue Angular</span>
+      </div>
+    </section>
+
+    <section class="panel table-card">
+      <div class="table-head">
+        <p>{{ filteredRows().length }} resultats</p>
+        <span class="table-meta">Tri inspire du cockpit React</span>
+      </div>
+
+      <div class="table-wrap" *ngIf="filteredRows().length; else emptyRows">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Segment</th>
+              <th>Gouvernorat</th>
+              <th class="align-right">Score Churn</th>
+              <th>Classe Risque</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of filteredRows(); trackBy: trackById">
+              <td>
+                <strong>{{ row.fullName }}</strong>
+                <span>ID : {{ row.clientSK }}</span>
+              </td>
+              <td>{{ row.segment }}</td>
+              <td>{{ row.gouvernorat }}</td>
+              <td class="align-right">
+                <div class="score-cell">
+                  <div class="score-bar">
+                    <div class="score-fill" [style.width.%]="row.riskScore"></div>
+                  </div>
+                  <span>{{ row.riskScore }}%</span>
+                </div>
+              </td>
+              <td>
+                <span class="pill" [class]="'pill-' + riskClassTone(row.riskClass)">{{ row.riskClass }}</span>
+              </td>
+              <td>
+                <a [routerLink]="['/intelligence/simulateur']" class="action-link">Simuler</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="isPage('simulateur')">
+    <section class="simulator-grid">
+      <div class="panel-padding">
+        <div class="panel-head">
+          <div>
+            <h2>Controleurs</h2>
+            <p>Selection client et hypothese de simulation.</p>
+          </div>
+        </div>
+
+        <div class="chips-row" *ngIf="pageData.suggestedClients?.length">
+          <button
+            *ngFor="let client of pageData.suggestedClients; trackBy: trackById"
+            type="button"
+            class="chip-button"
+            [class.active]="selectedClientId() === client.id"
+            (click)="selectClient(client.id)"
+          >
+            {{ client.fullName }}
+          </button>
+        </div>
+
+        <div class="selected-client panel">
+          <div *ngIf="selectedClient() as client; else noClient">
+            <strong>{{ client.fullName }}</strong>
+            <p>{{ client.segment }} - {{ client.gouvernorat }}</p>
+            <span>Score actuel : {{ client.riskScore }}% - ID {{ client.clientSK }}</span>
+          </div>
+        </div>
+
+        <div class="slider-stack" *ngIf="selectedClient()">
+          <label class="slider-field">
+            <div class="slider-head">
+              <span>Satisfaction</span>
+              <strong>{{ satisfaction() }}/100</strong>
+            </div>
+            <input type="range" min="20" max="100" [value]="satisfaction()" (input)="updateSimulatorField('satisfaction', $event)" />
+          </label>
+
+          <label class="slider-field">
+            <div class="slider-head">
+              <span>Nombre de produits</span>
+              <strong>{{ products() }}</strong>
+            </div>
+            <input type="range" min="1" max="6" [value]="products()" (input)="updateSimulatorField('products', $event)" />
+          </label>
+
+          <label class="slider-field">
+            <div class="slider-head">
+              <span>Reclamations</span>
+              <strong>{{ complaints() }}</strong>
+            </div>
+            <input type="range" min="0" max="10" [value]="complaints()" (input)="updateSimulatorField('complaints', $event)" />
+          </label>
+
+          <div class="advanced-panel">
+            <div class="panel-head compact">
+              <div>
+                <h3>Leviers avances</h3>
+                <p>Options supplementaires utiles selon le profil client.</p>
+              </div>
+              <span class="pill pill-primary">Optionnel</span>
+            </div>
+
+            <label class="slider-field">
+              <div class="slider-head">
+                <span>Connexions app / mois</span>
+                <strong>{{ appConnections() }}</strong>
+              </div>
+              <input type="range" min="0" max="40" [value]="appConnections()" (input)="updateSimulatorField('appConnections', $event)" />
+            </label>
+
+            <label class="slider-field">
+              <div class="slider-head">
+                <span>Fonctionnalites app</span>
+                <strong>{{ appFeatures() }}</strong>
+              </div>
+              <input type="range" min="0" max="10" [value]="appFeatures()" (input)="updateSimulatorField('appFeatures', $event)" />
+            </label>
+
+            <label class="slider-field">
+              <div class="slider-head">
+                <span>Paiements carte / mois</span>
+                <strong>{{ cardPayments() }}</strong>
+              </div>
+              <input type="range" min="0" max="40" [value]="cardPayments()" (input)="updateSimulatorField('cardPayments', $event)" />
+            </label>
+          </div>
+
+          <div *ngIf="scenarioDirty()" class="scenario-warning">
+            Les parametres ont change depuis le dernier calcul. Recalculez pour mettre a jour le score.
+          </div>
+
+          <button type="button" class="simulate-button" (click)="runSimulation()">Calculer la simulation</button>
+        </div>
+      </div>
+
+      <div class="simulator-results">
+        <div class="panel-padding" *ngIf="simulationResult() as result">
+          <div class="panel-head">
+            <div>
+              <h2>Resultat</h2>
+              <p>Lecture avant / apres du scenario simule.</p>
+            </div>
+            <span *ngIf="simulatedScore() !== null" class="pill" [class]="result.delta <= 0 ? 'pill-success' : 'pill-danger'">
+              {{ result.delta > 0 ? '+' : '' }}{{ result.delta }} pts
+            </span>
+          </div>
+
+          <div class="result-grid">
+            <article class="result-card">
+              <span>Avant</span>
+              <strong>{{ result.before }}%</strong>
+            </article>
+            <article class="result-card accent">
+              <span>Apres</span>
+              <strong>{{ result.after }}%</strong>
+            </article>
+          </div>
+        </div>
+
+        <div class="panel-padding">
+          <div class="panel-head">
+            <div>
+              <h2>Leviers du scenario</h2>
+              <p>Vue relative des changements saisis.</p>
+            </div>
+          </div>
+
+          <div *ngIf="scenarioDrivers().length; else noDrivers" class="driver-list">
+            <div *ngFor="let driver of scenarioDrivers()" class="driver-item" [class]="driver.tone">
+              <span>{{ driver.label }}</span>
+              <strong>{{ driver.value }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-padding">
+          <div class="panel-head">
+            <div>
+              <h2>Recommandations</h2>
+              <p>Action prioritaire generee a partir du scenario courant.</p>
+            </div>
+          </div>
+
+          <div class="tip-list">
+            <div *ngFor="let tip of contextualTips()" class="tip-card">{{ tip }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="isPage('explicabilite')">
+    <section class="metric-grid">
+      <article
+        *ngFor="let metric of pageData.metrics ?? []; trackBy: trackById"
+        class="metric-card panel"
+        [class]="metricToneClass(metric)"
+      >
+        <p>{{ metric.label }}</p>
+        <h2>{{ metric.value }}</h2>
+        <span>{{ metric.helperText }}</span>
+      </article>
+    </section>
+
+    <section class="explain-grid">
+      <div class="panel-padding">
+        <div class="panel-head">
+          <div>
+            <h2>Importance des variables</h2>
+            <p>Lecture globale des drivers churn du modele.</p>
+          </div>
+        </div>
+
+        <div class="feature-list">
+          <div *ngFor="let feature of pageData.featureImportance ?? []" class="feature-row">
+            <div class="feature-copy">
+              <strong>{{ feature.feature }}</strong>
+              <span>{{ feature.importance }}%</span>
+            </div>
+            <div class="feature-bar">
+              <div
+                class="feature-fill"
+                [class]="feature.direction"
+                [style.width]="featureWidth(feature)"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-stack">
+        <article *ngFor="let insight of pageData.insights ?? []; trackBy: trackById" class="panel-padding">
+          <h3>{{ insight.title }}</h3>
+          <p>{{ insight.description }}</p>
+        </article>
+
+        <article class="panel-padding">
+          <div class="panel-head compact">
+            <h3>Version modele</h3>
+            <span class="pill pill-primary">{{ pageData.modelVersion }}</span>
+          </div>
+          <p>
+            Le modele live expose ses variables les plus contributives pour relier le score churn a
+            des facteurs metier lisibles.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel-padding">
+      <div class="panel-head">
+        <div>
+          <h2>Exemples locaux</h2>
+          <p>Illustration de la logique explicative sur trois clients prioritaires.</p>
+        </div>
+      </div>
+
+      <div class="example-grid">
+        <article *ngFor="let row of pageData.examples ?? []; trackBy: trackById" class="example-card">
+          <div class="example-head">
+            <div>
+              <strong>{{ row.fullName }}</strong>
+              <p>{{ row.segment }} - {{ row.gouvernorat }}</p>
+            </div>
+            <span class="pill" [class]="'pill-' + riskClassTone(row.riskClass)">{{ row.riskScore }}%</span>
+          </div>
+          <div class="example-tags">
+            <span *ngFor="let item of row.topFeatures">{{ item }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="isPage('recommandations')">
+    <section class="metric-grid">
+      <article
+        *ngFor="let metric of pageData.metrics ?? []; trackBy: trackById"
+        class="metric-card panel"
+        [class]="metricToneClass(metric)"
+      >
+        <p>{{ metric.label }}</p>
+        <h2>{{ metric.value }}</h2>
+        <span>{{ metric.helperText }}</span>
+      </article>
+    </section>
+
+    <section class="recommendation-grid">
+      <a
+        *ngFor="let recommendation of pageData.recommendations ?? []; trackBy: trackById"
+        [routerLink]="recommendationPath(recommendation)"
+        class="panel recommendation-panel subtle-hover"
+      >
+        <div class="panel-head compact">
+          <span class="pill pill-primary">{{ recommendation.category }}</span>
+          <span class="pill pill-gold">{{ recommendation.roi }}</span>
+        </div>
+        <h3>{{ recommendation.title }}</h3>
+        <p>{{ recommendation.description }}</p>
+        <div class="recommendation-meta">
+          <span>Impact {{ recommendation.impact }}</span>
+          <span>{{ recommendation.priority }}</span>
+          <span>{{ recommendation.eta }}</span>
+        </div>
+      </a>
+    </section>
+  </ng-container>
+</ng-container>
+
+<ng-template #emptyRows>
+  <div class="status-empty">Aucun client ne correspond a cette combinaison de filtres.</div>
+</ng-template>
+
+<ng-template #noClient>
+  <div class="status-empty">Selectionnez un client pour lancer la simulation.</div>
+</ng-template>
+
+<ng-template #noDrivers>
+  <div class="status-empty">Aucun levier n a encore ete modifie pour ce scenario.</div>
+</ng-template>

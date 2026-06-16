@@ -1,0 +1,46 @@
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly [key: string]: string | boolean | undefined;
+  readonly VITE_API_BASE_URL?: string;
+  readonly VITE_POWERBI_EMBED_URL?: string;
+  readonly VITE_POWERBI_ACCESS_TOKEN?: string;
+  readonly VITE_POWERBI_VUE_GLOBALE_REPORT_ID?: string;
+  readonly VITE_POWERBI_VUE_GLOBALE_PAGE_NAME?: string;
+  readonly VITE_POWERBI_CLIENTS_CHURN_REPORT_ID?: string;
+  readonly VITE_POWERBI_CLIENTS_CHURN_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_GLOBAL_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_GLOBAL_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_GLOBAL_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_CLIENTS_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_CLIENTS_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_CLIENTS_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_CAMPAIGNS_OVERVIEW_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_CAMPAIGNS_OVERVIEW_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_CAMPAIGNS_OVERVIEW_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_GOOGLE_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_GOOGLE_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_GOOGLE_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_META_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_META_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_META_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_RECLAMATIONS_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_RECLAMATIONS_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_RECLAMATIONS_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_AGENCES_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_AGENCES_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_AGENCES_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_SOCIAL_MEDIA_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_SOCIAL_MEDIA_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_SOCIAL_MEDIA_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_SOCIALMEDIA_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_SOCIALMEDIA_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_SOCIALMEDIA_PAGE_NAME?: string;
+  readonly NEXT_PUBLIC_POWERBI_CLIENTS_RISQUE_EMBED_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_CLIENTS_RISQUE_OPEN_URL?: string;
+  readonly NEXT_PUBLIC_POWERBI_CLIENTS_RISQUE_PAGE_NAME?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

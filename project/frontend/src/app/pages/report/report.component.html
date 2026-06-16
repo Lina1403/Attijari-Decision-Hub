@@ -1,0 +1,137 @@
+<section *ngIf="isLoading()" class="status-empty">Chargement du dashboard...</section>
+
+<section *ngIf="error()" class="status-empty error">{{ error() }}</section>
+
+<ng-container *ngIf="report() as reportData">
+  <section class="report-hero" [class]="'tone-' + reportTone(reportData)">
+    <div class="report-badge">{{ reportBadge(reportData) }}</div>
+    <div class="hero-copy">
+      <p class="section-label">{{ reportData.category }}</p>
+      <h1 class="page-title">{{ reportData.title }}</h1>
+      <p class="page-subtitle">{{ reportData.description }}</p>
+      <div class="hero-pills">
+        <span class="pill pill-success">Power BI live</span>
+        <span class="pill pill-primary">Refresh {{ lastRefreshAt() }}</span>
+        <span class="pill pill-violet">Executive view</span>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <button type="button" class="btn btn-primary" (click)="scrollToSummary()">Resume AI</button>
+      <button type="button" class="btn btn-secondary" (click)="refreshView()">Actualiser</button>
+      <button *ngIf="config()?.openUrl" type="button" class="btn btn-secondary" (click)="openPowerBi()">
+        Power BI
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="openFullscreen()">Plein ecran</button>
+    </div>
+  </section>
+
+  <section class="stat-strip">
+    <article *ngFor="let stat of quickStats(reportData)" class="stat-card panel subtle-hover">
+      <p>{{ stat.label }}</p>
+      <strong>{{ stat.value }}</strong>
+      <span>{{ stat.trend }}</span>
+    </article>
+  </section>
+
+  <section class="workspace-grid">
+    <section class="embed-card panel">
+      <div class="embed-head">
+        <div>
+          <h2>{{ reportData.title }}</h2>
+          <p>Cadre analytique large, stable et optimise pour la lecture Power BI.</p>
+        </div>
+        <span class="embed-meta">Derniere actualisation : {{ lastRefreshAt() }}</span>
+      </div>
+
+      <div #embedFrame class="embed-frame">
+        <ng-container *ngIf="config() as embedConfig">
+          <ng-container *ngIf="embedConfig.embedEnabled && liveFrameUrl() as iframeUrl; else placeholderMode">
+            <iframe
+              class="report-iframe"
+              [src]="iframeUrl"
+              [title]="embedConfig.title"
+              loading="lazy"
+              allowfullscreen
+            ></iframe>
+          </ng-container>
+
+          <ng-template #placeholderMode>
+            <div class="placeholder-grid">
+              <div class="placeholder-copy">
+                <p class="section-label">Power BI placeholder</p>
+                <h3>{{ embedConfig.title }}</h3>
+                <p>{{ embedConfig.message }}</p>
+                <dl>
+                  <div>
+                    <dt>Report ID</dt>
+                    <dd>{{ embedConfig.reportId }}</dd>
+                  </div>
+                  <div>
+                    <dt>Page ID</dt>
+                    <dd>{{ embedConfig.pageId }}</dd>
+                  </div>
+                  <div>
+                    <dt>Mode embed</dt>
+                    <dd>{{ embedConfig.embedEnabled ? 'Actif' : 'Placeholder' }}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <div class="placeholder-visual">
+                <div class="visual-toolbar"></div>
+                <div class="visual-kpis">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="visual-chart"></div>
+                <div class="visual-table">
+                  <span *ngFor="let _ of [1, 2, 3, 4, 5]"></span>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </ng-container>
+      </div>
+    </section>
+
+    <aside class="control-rail">
+      <div class="panel-padding">
+        <p class="section-label">Filtres rapides</p>
+        <label>
+          Periode
+          <select>
+            <option>30 derniers jours</option>
+            <option>Trimestre courant</option>
+            <option>Annee courante</option>
+          </select>
+        </label>
+        <label>
+          Perimetre
+          <select>
+            <option>Toutes les agences</option>
+            <option>Grand Tunis</option>
+            <option>Top agences risque</option>
+          </select>
+        </label>
+        <label>
+          Segment
+          <select>
+            <option>Tous segments</option>
+            <option>Premium</option>
+            <option>Mass market</option>
+          </select>
+        </label>
+      </div>
+
+      <div #summarySection>
+        <app-ai-summary-panel
+          [dashboardType]="reportData.dashboardType"
+          [title]="'Resume AI - ' + reportData.title"
+          [hint]="'Lecture executive du dashboard ' + reportData.title + '.'"
+        ></app-ai-summary-panel>
+      </div>
+    </aside>
+  </section>
+</ng-container>

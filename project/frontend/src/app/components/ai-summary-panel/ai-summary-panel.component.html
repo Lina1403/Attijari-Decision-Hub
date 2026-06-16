@@ -1,0 +1,46 @@
+<article class="summary-card">
+  <div class="summary-head">
+    <div>
+      <p class="eyebrow">Groq</p>
+      <h3>{{ title() }}</h3>
+      <p class="hint">{{ hint() }}</p>
+    </div>
+    <button type="button" class="refresh-button" (click)="generate(true)" [disabled]="isLoading()">
+      {{ isLoading() ? 'Generation...' : 'Regenerer' }}
+    </button>
+  </div>
+
+  <div *ngIf="error()" class="error-message">
+    {{ error() }}
+  </div>
+
+  <div *ngIf="isLoading() && !summary()" class="loading-copy">
+    Preparation du contexte puis generation du resume...
+  </div>
+
+  <ng-container *ngIf="summary() as ai">
+    <p class="global-summary">{{ ai.summary.globalSummary }}</p>
+
+    <div class="summary-grid">
+      <section>
+        <p class="section-label">Points forts</p>
+        <ul>
+          <li *ngFor="let item of ai.summary.strengths">{{ item }}</li>
+        </ul>
+      </section>
+
+      <section>
+        <p class="section-label">Points de vigilance</p>
+        <ul>
+          <li *ngFor="let item of ai.summary.watchouts">{{ item }}</li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="summary-meta">
+      <span>Modele {{ ai.meta.model }}</span>
+      <span>{{ ai.meta.cacheHit ? 'Cache' : 'Generation live' }}</span>
+      <span>Source {{ ai.meta.contextSource }}</span>
+    </div>
+  </ng-container>
+</article>
